@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"github.com/redis/go-redis/v9"
 	"time"
 	"unsafe"
@@ -60,7 +61,8 @@ func (m *ActionManager[A]) RegisterAction(ctx context.Context, action A) (string
 	})
 
 	if err != nil {
-		return "", err
+		// TODO DO NOT LEAK
+		return "", fmt.Errorf("failed to register action with key (%s): %w", key, err)
 	}
 
 	return token, nil
