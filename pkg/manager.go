@@ -68,6 +68,10 @@ func (m *ActionManager[A]) ConfirmAction(ctx context.Context, token string) (*A,
 		return nil, err
 	}
 
+	if res.Err() != nil {
+		return nil, res.Err()
+	}
+
 	var action A
 
 	err = res.Scan(&action)
