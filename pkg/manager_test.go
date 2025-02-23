@@ -15,7 +15,7 @@ type TestAction struct {
 
 func client() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
+		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
