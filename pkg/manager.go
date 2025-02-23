@@ -33,12 +33,15 @@ func (m *ActionManager[A]) transaction(ctx context.Context, fn func(redis.Pipeli
 	if err != nil {
 		return err
 	}
-	for _, cmd := range cmds {
-		if cmd.Err() != nil {
-			return cmd.Err()
-		}
+	errs := make([]error, len(cmds)+1)
+
+	for i, cmd := range cmds {
+		errs[i] = cmd.Err()
 	}
-	return nil
+
+	errs[len(errs)-1] = err
+
+	return errors.Join(errs...)
 }
 
 func (m *ActionManager[A]) RegisterAction(ctx context.Context, action *A) (string, error) {
