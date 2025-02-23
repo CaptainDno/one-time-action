@@ -1,0 +1,24 @@
+name: Testing
+on: [push]
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup Golang
+        uses: actions/setup-go@v5
+      - name: Install dependencies
+        run: go get .
+      - name: Run tests
+        run: go test
