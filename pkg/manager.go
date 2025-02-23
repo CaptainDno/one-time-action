@@ -85,13 +85,14 @@ func (m *ActionManager[A]) ConfirmAction(ctx context.Context, token string) (*A,
 	}
 
 	if res.Err() != nil {
-		if errors.Is(res.Err(), redis.Nil) {
-			return nil, NonExistentAction
-		}
 		return nil, res.Err()
 	}
 
 	var action A
+
+	if len(res.Val()) == 0 {
+		return nil, NonExistentAction
+	}
 
 	err = res.Scan(&action)
 
