@@ -3,10 +3,13 @@ package pkg
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"github.com/redis/go-redis/v9"
 	"time"
 	"unsafe"
 )
+
+var NonExistentAction = errors.New("non existent action")
 
 type ActionManager[A any] struct {
 	TokenLength int
@@ -25,6 +28,19 @@ func NewActionManager[A any](rdb *redis.Client, tokenLength int, prefix string, 
 	}
 }
 
+func (m *ActionManager[A]) transaction(ctx context.Context, fn func(redis.Pipeliner) error) error {
+	cmds, err := m.rdb.TxPipelined(ctx, fn)
+	if err != nil {
+		return err
+	}
+	for _, cmd := range cmds {
+		if cmd.Err() != nil {
+			return cmd.Err()
+		}
+	}
+	return nil
+}
+
 func (m *ActionManager[A]) RegisterAction(ctx context.Context, action *A) (string, error) {
 	token, err := m.newToken()
 
@@ -34,16 +50,14 @@ func (m *ActionManager[A]) RegisterAction(ctx context.Context, action *A) (strin
 
 	key := m.RedisPrefix + token
 
-	tx := m.rdb.TxPipeline()
-	res := tx.HSet(ctx, key, action)
-	tx.Expire(ctx, key, m.TTL)
-	_, err = tx.Exec(ctx)
+	err = m.transaction(ctx, func(pipe redis.Pipeliner) error {
+		pipe.HSet(ctx, key, action)
+		pipe.Expire(ctx, key, m.TTL)
+		return nil
+	})
+
 	if err != nil {
 		return "", err
-	}
-
-	if res.Err() != nil {
-		return "", res.Err()
 	}
 
 	return token, nil
@@ -57,18 +71,23 @@ func (m *ActionManager[A]) CancelAction(ctx context.Context, token string) error
 
 func (m *ActionManager[A]) ConfirmAction(ctx context.Context, token string) (*A, error) {
 	key := m.RedisPrefix + token
-	tx := m.rdb.TxPipeline()
 
-	res := tx.HGetAll(ctx, key)
-	tx.Del(ctx, key)
+	var res *redis.MapStringStringCmd
 
-	_, err := tx.Exec(ctx)
+	err := m.transaction(ctx, func(pipe redis.Pipeliner) error {
+		res = pipe.HGetAll(ctx, key)
+		pipe.Del(ctx, key)
+		return nil
+	})
 
 	if err != nil {
 		return nil, err
 	}
 
 	if res.Err() != nil {
+		if errors.Is(res.Err(), redis.Nil) {
+			return nil, NonExistentAction
+		}
 		return nil, res.Err()
 	}
 

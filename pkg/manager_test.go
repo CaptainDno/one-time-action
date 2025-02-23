@@ -28,7 +28,7 @@ func TestActionManager_ConfirmNonExistent(t *testing.T) {
 	manager := NewActionManager[TestAction](db, 32, "action:", time.Second*5)
 
 	a, err := manager.ConfirmAction(context.Background(), "test-nonexistent")
-	assert.NotNil(t, err)
+	assert.ErrorIs(t, err, NonExistentAction)
 	assert.Nil(t, a)
 }
 
