@@ -12,8 +12,8 @@ var db = client()
 var manager = NewActionManager[TestAction](db, 32, "action:", time.Second*5)
 
 type TestAction struct {
-	a string `redis:"a"`
-	b int    `redis:"b"`
+	A string `redis:"a"`
+	B int    `redis:"b"`
 }
 
 func client() *redis.Client {
@@ -32,8 +32,8 @@ func TestActionManager_ConfirmNonExistent(t *testing.T) {
 
 func put(t *testing.T, manager *ActionManager[TestAction]) string {
 	action := TestAction{
-		a: "test",
-		b: 1,
+		A: "test",
+		B: 1,
 	}
 
 	token, err := manager.RegisterAction(context.Background(), action)
@@ -49,8 +49,8 @@ func TestActionManager_FullFlow(t *testing.T) {
 	a, err := manager.ConfirmAction(context.Background(), token)
 
 	assert.NoError(t, err)
-	assert.Equal(t, "test", a.a)
-	assert.Equal(t, 1, a.b)
+	assert.Equal(t, "test", a.A)
+	assert.Equal(t, 1, a.B)
 }
 
 func TestActionManager_CancelAction(t *testing.T) {
