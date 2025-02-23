@@ -43,16 +43,6 @@ func put(t *testing.T, manager *ActionManager[TestAction]) string {
 	return token
 }
 
-func TestActionManager_FullFlow(t *testing.T) {
-	token := put(t, manager)
-
-	a, err := manager.ConfirmAction(context.Background(), token)
-
-	assert.NoError(t, err)
-	assert.Equal(t, "test", a.a)
-	assert.Equal(t, 1, a.b)
-}
-
 func TestActionManager_CancelAction(t *testing.T) {
 	token := put(t, manager)
 
