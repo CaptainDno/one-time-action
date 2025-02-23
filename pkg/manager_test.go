@@ -27,7 +27,7 @@ func TestActionManager_ConfirmNonExistent(t *testing.T) {
 
 	manager := NewActionManager[TestAction](db, 32, "action:", time.Second*5)
 
-	a, err := manager.ConfirmAction(context.Background(), "test")
+	a, err := manager.ConfirmAction(context.Background(), "test-nonexistent")
 	assert.NotNil(t, err)
 	assert.Nil(t, a)
 }
@@ -76,7 +76,7 @@ func TestActionManager_CancelNonExistent(t *testing.T) {
 	db := client()
 
 	manager := NewActionManager[TestAction](db, 32, "action:", time.Second*5)
-	assert.NoError(t, manager.CancelAction(context.Background(), "test"))
+	assert.NoError(t, manager.CancelAction(context.Background(), "test-nonexistent"))
 }
 
 func TestActionManager_TTL(t *testing.T) {
