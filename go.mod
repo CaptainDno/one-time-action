@@ -1,4 +1,4 @@
-module one-time-action
+module github.com/Captaindno/one-time-action
 
 go 1.23
 
