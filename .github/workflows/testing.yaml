@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       redis:
-        image: redis
+        image: redis:latest
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
