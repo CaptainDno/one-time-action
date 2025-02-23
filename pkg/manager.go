@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"errors"
-	"fmt"
 	"github.com/redis/go-redis/v9"
 	"time"
 	"unsafe"
@@ -12,6 +11,8 @@ import (
 
 var NonExistentAction = errors.New("non existent action")
 
+// ActionManager provides methods to create single-use action tokens.
+// Please, read go-redis HSet() documentation for possible generic action type.
 type ActionManager[A any] struct {
 	TokenLength int
 	RedisPrefix string
@@ -61,8 +62,7 @@ func (m *ActionManager[A]) RegisterAction(ctx context.Context, action A) (string
 	})
 
 	if err != nil {
-		// TODO DO NOT LEAK
-		return "", fmt.Errorf("failed to register action with key (%s): %w", key, err)
+		return "", err
 	}
 
 	return token, nil
