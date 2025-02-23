@@ -19,4 +19,4 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v5
       - name: Run tests
-        run: go test
+        run: go test ./pkg
