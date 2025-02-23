@@ -31,7 +31,7 @@ func TestActionManager_ConfirmNonExistent(t *testing.T) {
 }
 
 func put(t *testing.T, manager *ActionManager[TestAction]) string {
-	action := &TestAction{
+	action := TestAction{
 		a: "test",
 		b: 1,
 	}
@@ -41,6 +41,16 @@ func put(t *testing.T, manager *ActionManager[TestAction]) string {
 	assert.NotEmpty(t, token)
 
 	return token
+}
+
+func TestActionManager_FullFlow(t *testing.T) {
+	token := put(t, manager)
+
+	a, err := manager.ConfirmAction(context.Background(), token)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "test", a.a)
+	assert.Equal(t, 1, a.b)
 }
 
 func TestActionManager_CancelAction(t *testing.T) {

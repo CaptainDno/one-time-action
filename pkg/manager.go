@@ -44,7 +44,7 @@ func (m *ActionManager[A]) transaction(ctx context.Context, fn func(redis.Pipeli
 	return errors.Join(errs...)
 }
 
-func (m *ActionManager[A]) RegisterAction(ctx context.Context, action *A) (string, error) {
+func (m *ActionManager[A]) RegisterAction(ctx context.Context, action A) (string, error) {
 	token, err := m.newToken()
 
 	if err != nil {
