@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+var db = client()
+var manager = NewActionManager[TestAction](db, 32, "action:", time.Second*5)
+
 type TestAction struct {
 	a string `redis:"a"`
 	b int    `redis:"b"`
@@ -22,11 +25,6 @@ func client() *redis.Client {
 }
 
 func TestActionManager_ConfirmNonExistent(t *testing.T) {
-
-	db := client()
-
-	manager := NewActionManager[TestAction](db, 32, "action:", time.Second*5)
-
 	a, err := manager.ConfirmAction(context.Background(), "test-nonexistent")
 	assert.ErrorIs(t, err, NonExistentAction)
 	assert.Nil(t, a)
@@ -46,10 +44,6 @@ func put(t *testing.T, manager *ActionManager[TestAction]) string {
 }
 
 func TestActionManager_FullFlow(t *testing.T) {
-	db := client()
-
-	manager := NewActionManager[TestAction](db, 32, "action:", time.Second*5)
-
 	token := put(t, manager)
 
 	a, err := manager.ConfirmAction(context.Background(), token)
@@ -60,9 +54,6 @@ func TestActionManager_FullFlow(t *testing.T) {
 }
 
 func TestActionManager_CancelAction(t *testing.T) {
-	db := client()
-
-	manager := NewActionManager[TestAction](db, 32, "action:", time.Second*5)
 	token := put(t, manager)
 
 	assert.NoError(t, manager.CancelAction(context.Background(), token))
@@ -73,16 +64,10 @@ func TestActionManager_CancelAction(t *testing.T) {
 }
 
 func TestActionManager_CancelNonExistent(t *testing.T) {
-	db := client()
-
-	manager := NewActionManager[TestAction](db, 32, "action:", time.Second*5)
 	assert.NoError(t, manager.CancelAction(context.Background(), "test-nonexistent"))
 }
 
 func TestActionManager_TTL(t *testing.T) {
-	db := client()
-
-	manager := NewActionManager[TestAction](db, 32, "action:", time.Second*5)
 	token := put(t, manager)
 
 	time.Sleep(time.Second * 6)
