@@ -1,4 +1,4 @@
-module github.com/Captaindno/one-time-action
+module github.com/CaptainDno/one-time-action
 
 go 1.23
 
